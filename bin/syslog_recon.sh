@@ -144,5 +144,5 @@ done
 
 echo "</table><br><br>" >> $OUTPUT_FILE
 
-cat $OUTPUT_FILE | /usr/sbin/ssmtp riyaz@xceednet.com
+cat $OUTPUT_FILE | /usr/sbin/ssmtp support@xceednet.com
 
