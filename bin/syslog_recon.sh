@@ -5,7 +5,7 @@ OUTPUT_FILE=/remotelogs/syslog_recon_rpt.csv
 echo "MIME-Version: 1.0" > $OUTPUT_FILE
 echo "Content-Type: text/html; charset=utf8" >> $OUTPUT_FILE
 echo "from: XNLogUser<alerts@xceednet.com>" >> $OUTPUT_FILE
-echo "Subject: Syslog Reconciliation Daily Report" >> $OUTPUT_FILE
+echo "Subject: Syslog Reconciliation - Daily Report" >> $OUTPUT_FILE
 echo "<html>" >> $OUTPUT_FILE
 echo "<head>" >> $OUTPUT_FILE
 echo "<style>" >> $OUTPUT_FILE
@@ -27,8 +27,8 @@ echo "</style>" >> $OUTPUT_FILE
 echo "</head>" >> $OUTPUT_FILE
 
 echo "<body>" >> $OUTPUT_FILE
-echo "<h2>Syslog Reconciliation Daily Report</h2>" >> $OUTPUT_FILE
-echo "<h3>1. Either Location/Operator/ISP is disabled OR the setting for logs_maintained_by_xceednet is FALSE but still syslogs are getting generated</h3>" >> $OUTPUT_FILE
+echo "<h2>Syslog Reconciliation - Daily Report</h2>" >> $OUTPUT_FILE
+echo "<h3>1. Either Location/Operator/ISP is disabled OR the setting for logs_maintained_by_xceednet is FALSE but syslogs are still getting generated</h3>" >> $OUTPUT_FILE
 
 echo "<table><tr><th>URL</th><th>Syslog Prefix</th><th>NAS IP</th><th>Error Description</th></tr>" >> $OUTPUT_FILE
 
