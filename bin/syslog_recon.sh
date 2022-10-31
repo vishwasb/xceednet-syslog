@@ -32,7 +32,7 @@ echo "<h3>1. Either Location/Operator/ISP is disabled OR the setting for logs_ma
 
 echo "<table><tr><th>URL</th><th>Syslog Prefix</th><th>NAS IP</th><th>Error Description</th></tr>" >> $OUTPUT_FILE
 
-ACTIVE_PREFIX_AND_IP_ARRAY=( $( find /remotelogs -type f -mtime -2 -name syslog | sed 's/^\/remotelogs\/message .*$//g' | sed 's/^\/remotelogs\///g' | cut -d '/' -f1,2 | sort -u ) )
+ACTIVE_PREFIX_AND_IP_ARRAY=( $( find /remotelogs -type f -mtime -2 -name syslog | sed '/^.*\/remotelogs\/message .*$/d' | sed 's/^\/remotelogs\///g' | cut -d '/' -f1,2 | sort -u ) )
 PARENT_LOCATION_PREFIX_ARRAY=()
 SUBLOCATION_PREFIX_ARRAY=()
 for PREFIX_AND_IP in "${ACTIVE_PREFIX_AND_IP_ARRAY[@]}"
@@ -52,6 +52,7 @@ do
 	IS_LOCATION_DISABLED=${LOCATION_PREFIX_DATA[5]}
 	IS_OPERATOR_DISABLED=${LOCATION_PREFIX_DATA[6]}
 	IS_ISP_DISABLED=${LOCATION_PREFIX_DATA[7]}
+	ONLINE_SUBSCRIBER_COUNT=${LOCATION_PREFIX_DATA[8]}
 
 	#echo $LOCATION_ID
 	#echo $LOCATION_URL
@@ -104,6 +105,7 @@ do
 	IS_LOCATION_DISABLED=${LOCATION_PREFIX_DATA[5]}
 	IS_OPERATOR_DISABLED=${LOCATION_PREFIX_DATA[6]}
 	IS_ISP_DISABLED=${LOCATION_PREFIX_DATA[7]}
+	ONLINE_SUBSCRIBER_COUNT=${LOCATION_PREFIX_DATA[8]}
 
 	#echo $LOCATION_ID
 	#echo $LOCATION_URL
@@ -125,24 +127,28 @@ do
 		#echo " ${LOCATION_PREFIX_ARRAY[*]} "
 		echo "<tr><td>${LOCATION_URL}</td><td>${LOCATION_PREFIX}</td></tr>" >> $OUTPUT_FILE
 	fi
-	
+
 done < "${INPUT_FILE}"
 
 echo "</table><br><br>" >> $OUTPUT_FILE
 
 echo "<h3>3. Log files with large size.</h3>" >> $OUTPUT_FILE
 echo "<table>" >> $OUTPUT_FILE
-echo "<tr><th>File Size</th><th>Syslog file</th></tr>" >> $OUTPUT_FILE
+echo "<tr><th>File Size</th><th>Online Subscribers<br>Count</th><th>URL</th><th>Syslog File</th></tr>" >> $OUTPUT_FILE
 
-LARGE_SYSLOG_FILES_ARRAY=( $( find /remotelogs -type f -size +256M -name "syslog" -exec ls -al {} \; | awk -F ' ' '{ print $5, $9 }' | sort -n -r | numfmt --field=1 --to=iec --format "%8f" | sed 's/^[ ][ ]*//g' | sed 's/ /|/g' ) )
+LARGE_SYSLOG_FILES_ARRAY=( $( find /remotelogs -type f -size +256M -name "syslog" -exec ls -al {} \; | sed '/^.*\/remotelogs\/message .*$/d' | awk -F ' ' '{ TP1 = $9; split(TP1, PREFIX_AND_IP, "/"); print $5, $9, PREFIX_AND_IP[3] }' | sort -n -r | numfmt --field=1 --to=iec --format "%8f" | sed 's/^[ ][ ]*//g' | sed 's/ /|/g' ) )
 for LARGE_SYSLOG_FILE in "${LARGE_SYSLOG_FILES_ARRAY[@]}"
 do
 	#echo ${LARGE_SYSLOG_FILE}
 	IFS='\|' read -ra SYSLOG_FILENAME_AND_SIZE <<< ${LARGE_SYSLOG_FILE}
-	echo "<tr><td>${SYSLOG_FILENAME_AND_SIZE[0]}</td><td>${SYSLOG_FILENAME_AND_SIZE[1]}</td></tr>" >> $OUTPUT_FILE
+
+	IFS='|' read -ra LOCATION_PREFIX_DATA <<< $( grep ${SYSLOG_FILENAME_AND_SIZE[2]} ${INPUT_FILE} )
+	LOCATION_URL=${LOCATION_PREFIX_DATA[1]}
+	ONLINE_SUBSCRIBER_COUNT=${LOCATION_PREFIX_DATA[8]}
+
+	echo "<tr><td style='text-align: center'>${SYSLOG_FILENAME_AND_SIZE[0]}</td><td style='text-align: center'>${ONLINE_SUBSCRIBER_COUNT}</td><td>${LOCATION_URL}</td><td>${SYSLOG_FILENAME_AND_SIZE[1]}</td></tr>" >> $OUTPUT_FILE
 done
 
 echo "</table><br><br>" >> $OUTPUT_FILE
 
 cat $OUTPUT_FILE | /usr/sbin/ssmtp support@xceednet.com
-
