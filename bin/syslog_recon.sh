@@ -123,6 +123,7 @@ do
 		"${IS_OPERATOR_DISABLED}" == "0" && \
 		"${IS_ISP_DISABLED}" == "0" && \
 		"${LOGS_MAINTAINED_BY_XCEEDNET}" == "1" && \
+		"${ONLINE_SUBSCRIBER_COUNT}" != "0" && \
 		! " ${PARENT_LOCATION_PREFIX_ARRAY[*]} " =~ " ${LOCATION_PREFIX} " ]]; then
 		#echo " ${LOCATION_PREFIX_ARRAY[*]} "
 		echo "<tr><td>${LOCATION_URL}</td><td>${LOCATION_PREFIX}</td></tr>" >> $OUTPUT_FILE
